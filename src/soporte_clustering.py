@@ -512,3 +512,35 @@ class Clustering:
             "davies_bouldin_index": davies_bouldin,
             "cardinalidad": cardinalidad
         }, index = [0])
+
+    def radar_plot(self, dataframe, variables, columna_cluster):
+
+        # Agrupar por cluster y calcular la media
+        cluster_means = dataframe.groupby(columna_cluster)[variables].mean()
+
+        # Repetir la primera columna al final para cerrar el radar
+        cluster_means = pd.concat([cluster_means, cluster_means.iloc[:, 0:1]], axis=1)
+
+        # Crear los ángulos para el radar plot
+        num_vars = len(variables)
+        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+        angles += angles[:1]  # Cerrar el gráfico
+
+        # Crear el radar plot
+        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+        # Dibujar un gráfico para cada cluster
+        for i, row in cluster_means.iterrows():
+            ax.plot(angles, row, label=f'Cluster {i}')
+            ax.fill(angles, row, alpha=0.25)
+
+        # Configurar etiquetas de los ejes
+        ax.set_theta_offset(np.pi / 2)
+        ax.set_theta_direction(-1)
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(variables)
+
+        # Añadir leyenda y título
+        plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+        plt.title('Radar Plot de los Clusters', size=16)
+        plt.show()
